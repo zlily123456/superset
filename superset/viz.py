@@ -47,6 +47,7 @@ class BaseViz(object):
     is_timeseries = False
     default_fillna = 0
 
+
     def __init__(self, datasource, form_data):
         if not datasource:
             raise Exception(_('Viz is missing a datasource'))
