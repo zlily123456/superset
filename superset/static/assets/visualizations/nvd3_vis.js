@@ -124,7 +124,13 @@ function nvd3Vis(slice, payload) {
   }
 
   let width = slice.width();
+  let height = slice.height();
   const fd = slice.formData;
+  const vizType = fd.viz_type;
+  const f = d3.format('.3s');
+  const reduceXTicks = fd.reduce_x_ticks || false;
+  let stacked = false;
+  let row;
 
   const barchartWidth = function () {
     let bars;
@@ -138,12 +144,6 @@ function nvd3Vis(slice, payload) {
     }
     return width;
   };
-
-  const vizType = fd.viz_type;
-  const f = d3.format('.3s');
-  const reduceXTicks = fd.reduce_x_ticks || false;
-  let stacked = false;
-  let row;
 
   const drawGraph = function () {
     let svg = d3.select(slice.selector).select('svg');
@@ -167,7 +167,8 @@ function nvd3Vis(slice, payload) {
         break;
 
       case 'dual_line':
-        chart = nv.models.multiChart();
+        chart = nv.models.multiChart()
+          .legendRightAxisHint(' (右Ｙ轴)');
         chart.interpolate('linear');
         break;
 
@@ -191,6 +192,46 @@ function nvd3Vis(slice, payload) {
           setTimeout(function () {
             addTotalBarValues(svg, chart, data, stacked, fd.y_axis_format);
           }, animationTime);
+        }
+        break;
+
+      case 'line_bar':
+        chart = nv.models.linePlusBarChart()
+          .legendLeftAxisHint('')
+          .legendRightAxisHint(' (右Ｙ轴)');
+          // .x(function (d, i) { return i; });
+        // chart.xAxis.tickFormat(function (d) {
+        //   const dx = data[0].values[d] && data[0].values[d].x || '';
+        //   return dx;
+        // });
+        // chart.x2Axis.tickFormat(function (d) {
+        //   const dx = data[0].values[d] && data[0].values[d].x || '';
+        //   return dx;
+        // });
+        chart.lines.interpolate(fd.line_interpolation);
+        chart.lines2.interpolate(fd.line_interpolation);
+        chart.xAxis.tickFormat(function (d) {
+          return d3.time.format('%x')(new Date(d));
+        }).showMaxMin(false);
+
+        chart.x2Axis.tickFormat(function (d) {
+          return d3.time.format('%x')(new Date(d));
+        }).showMaxMin(false);
+        // chart.xAxis.showMaxMin(reduceXTicks);
+        // chart.x2Axis.showMaxMin(reduceXTicks);
+        chart.y1Axis.tickFormat(d3.format(fd.y_axis_format));
+        chart.y2Axis.tickFormat(d3.format(fd.y_axis_2_format));
+        chart.bars.forceY([0]).padData(false);
+        // console.log('1111', data[0].values());
+        // const w = slice.width() / data[0].values().length;
+        // const spaceWidth = w / 3;
+        // const barWidth = spaceWidth * 2;
+        // const selector = d3.select(slice.selector).selectAll('rect');
+        // selector.style('width', function (d, i) {
+        //   return barWidth;
+        // });
+        if (!fd.show_brush) {
+          chart.focusEnable(!chart.focusEnable());
         }
         break;
 
@@ -317,7 +358,6 @@ function nvd3Vis(slice, payload) {
       }
     }
 
-    let height = slice.height();
     if (vizType === 'bullet') {
       height = Math.min(height, 50);
     }
@@ -337,7 +377,7 @@ function nvd3Vis(slice, payload) {
       chart.xScale(d3.scale.log());
     }
     const isTimeSeries = [
-      'line', 'dual_line', 'area', 'compare', 'bar'].indexOf(vizType) >= 0;
+      'line', 'dual_line', 'area', 'compare', 'bar', 'time_pivot'].indexOf(vizType) >= 0;
     // if x axis format is a date format, rotate label 90 degrees
     if (isTimeSeries) {
       chart.xAxis.rotateLabels(45);
@@ -356,9 +396,12 @@ function nvd3Vis(slice, payload) {
       chart.xAxis.tickFormat(xAxisFormatter);
     }
 
-    const yAxisFormatter = d3FormatPreset(fd.y_axis_format);
+    let yAxisFormatter = d3FormatPreset(fd.y_axis_format);
     if (chart.yAxis && chart.yAxis.tickFormat) {
       chart.yAxis.tickFormat(yAxisFormatter);
+    }
+    if (vizType === 'line_bar') {
+      yAxisFormatter = d3FormatPreset(fd.y_axis_2_format);
     }
     if (chart.y2Axis && chart.y2Axis.tickFormat) {
       chart.y2Axis.tickFormat(yAxisFormatter);
@@ -418,8 +461,8 @@ function nvd3Vis(slice, payload) {
     } else {
       chart.margin({ bottom: fd.bottom_margin });
     }
-
-    if (vizType === 'dual_line') {
+    const isTwoY = ['dual_line'].indexOf(vizType) >= 0
+    if (isTwoY) {
       const yAxisFormatter1 = d3.format(fd.y_axis_format);
       const yAxisFormatter2 = d3.format(fd.y_axis_2_format);
       chart.yAxis1.tickFormat(yAxisFormatter1);

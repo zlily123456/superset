@@ -130,6 +130,83 @@ export const visTypes = {
     },
   },
 
+  line_bar: {
+    label: t('Line Bar Combo'),
+    showOnExplore: true,
+    controlPanelSections: [
+      {
+        label: t('Chart Options'),
+        expanded: true,
+        controlSetRows: [
+          ['groupby'],
+          ['columns'],
+          ['metrics'],
+          ['bar_metrics'],
+          ['click_able'],
+          ['target_list'],
+          ['color_scheme'],
+          ['show_legend', 'show_brush'],
+          ['show_markers', 'y_axis_showminmax'],
+          ['x_axis_format', 'y_axis_format'],
+          ['y_axis_2_format', 'row_limit'],
+          ['line_interpolation', 'y_axis_bounds'],
+          ['bottom_margin', 'right_margin'],
+        ],
+      },
+    ],
+    controlOverrides: {
+      groupby: {
+        label: t('Series'),
+      },
+      columns: {
+        label: t('Breakdowns'),
+        description: t('Defines how each series is broken down'),
+      },
+    },
+  },
+
+  gauge: {
+    label: t('Gauge View'),
+    showOnExplore: true,
+    controlPanelSections: [
+      {
+        label: t('Chart Options'),
+        expanded: true,
+        controlSetRows: [
+          ['metric'],
+          ['min', 'max', 'num'],
+          ['face_color', 'inner_face_color'],
+          ['needle_color', 'ticks_color'],
+          ['value_color', 'stroke_color'],
+          ['stroke_width'],
+          ['value_font_size', 'ticks_font_size'],
+          ['y_axis_format'],
+          ['click_able', 'row_limit'],
+          ['target_list'],
+        ],
+      },
+    ],
+  },
+
+  tree: {
+    label: t('Tree'),
+    showOnExplore: true,
+    controlPanelSections: [
+      {
+        label: t('Chart Options'),
+        expanded: true,
+        controlSetRows: [
+          ['groupby'],
+          ['metrics'],
+          ['click_able'],
+          ['target_list'],
+          ['table_timestamp_format'],
+          ['y_axis_format', 'row_limit'],
+        ],
+      },
+    ],
+  },
+
   pie: {
     label: t('Pie Chart'),
     showOnExplore: true,
@@ -339,7 +416,8 @@ export const visTypes = {
         description: t('Use this section if you want a query that aggregates'),
         controlSetRows: [
           ['groupby'],
-          ['metrics', 'percent_metrics'],
+          ['metrics'],
+          ['percent_metrics'],
           ['include_time'],
           ['timeseries_limit_metric', 'order_desc'],
         ],
@@ -463,7 +541,8 @@ export const visTypes = {
         label: t('Query'),
         expanded: true,
         controlSetRows: [
-          ['series', 'metric', 'limit'],
+          ['series', 'metric'],
+          ['row_limit', null],
         ],
       },
       {
@@ -844,8 +923,9 @@ export const visTypes = {
       },
       {
         label: t('Options'),
+        expanded: true,
         controlSetRows: [
-          ['select_country'],
+          ['select_country', 'number_format'],
           ['linear_color_scheme'],
         ],
       },
@@ -910,6 +990,7 @@ export const visTypes = {
         controlSetRows: [
           ['groupby'],
           ['metric'],
+          ['filter_control_list'],
           ['date_filter', 'instant_filtering'],
           ['show_sqla_time_granularity', 'show_sqla_time_column'],
           ['show_druid_time_granularity', 'show_druid_time_origin'],
@@ -971,7 +1052,7 @@ export const visTypes = {
         expanded: true,
         controlSetRows: [
           ['all_columns_x', 'all_columns_y'],
-          ['metric'],
+          ['metric', 'row_limit'],
         ],
       },
       {
@@ -1062,9 +1143,8 @@ export const visTypes = {
       {
         label: t('Viewport'),
         controlSetRows: [
-          ['viewport_longitude'],
-          ['viewport_latitude'],
-          ['viewport_zoom'],
+          ['viewport_longitude', 'viewport_latitude'],
+          ['viewport_zoom', null],
         ],
       },
     ],

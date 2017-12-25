@@ -1,0 +1,22 @@
+.label{
+    font-size:20.5px;
+    fill:#000000;
+    text-anchor:middle;
+    alignment-baseline:middle;
+}
+.face{
+    stroke:#c8c8c8;
+    stroke-width:2;
+}
+.minorTicks{
+    stroke-width:2;
+    stroke:rgb(26,12,37);
+}
+.majorTicks{
+    stroke:rgb(26,12,37);
+    stroke-width:2;
+}
+.textClass{
+    stroke:#ff0000;
+    font-size:20.5px;
+}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { formatSelectOptionsForRange, formatSelectOptions } from '../../modules/utils';
 import * as v from '../validators';
-import { ALL_COLOR_SCHEMES, spectrums } from '../../modules/colors';
+import { colorPrimary, ALL_COLOR_SCHEMES, spectrums } from '../../modules/colors';
+import { defaultViewport } from '../../modules/geo';
 import MetricOption from '../../components/MetricOption';
 import ColumnOption from '../../components/ColumnOption';
 import OptionDescription from '../../components/OptionDescription';
@@ -85,6 +86,46 @@ export const controls = {
     description: t('The type of visualization to display'),
   },
 
+  click_able: {
+    type: 'SelectControl',
+    label: t('Click Able'),
+    default: t('no'),
+    description: t(''),
+    choices: [
+      ['yes', 'Yes'],
+      ['no', 'No'],
+    ],
+  },
+
+  target_list: {
+    type: 'TextControl',
+    label: t('List of Target Slice ID'),
+    default: '',
+    description: t('List of Target Slice ID'),
+  },
+
+  filter_control_list: {
+    type: 'TextControl',
+    label: t('Filter Control List'),
+    default: '',
+    description: t('The filter control other filter config'),
+  },
+
+  bar_metrics: {
+    type: 'SelectControl',
+    multi: true,
+    label: t('Bar Metrics'),
+    validators: [v.nonEmpty],
+    valueKey: 'metric_name',
+    optionRenderer: m => <MetricOption metric={m} />,
+    valueRenderer: m => <MetricOption metric={m} />,
+    default: c => c.options && c.options.length > 0 ? [c.options[0].metric_name] : null,
+    mapStateToProps: state => ({
+      options: (state.datasource) ? state.datasource.metrics : [],
+    }),
+    description: t('One or many metrics to display by Bar'),
+  },
+
   metrics: {
     type: 'SelectControl',
     multi: true,
@@ -133,6 +174,14 @@ export const controls = {
     mapStateToProps: state => ({
       choices: (state.datasource) ? state.datasource.order_by_choices : [],
     }),
+  },
+
+  color_picker: {
+    label: t('Fixed Color'),
+    description: t('Use this to define a static color for all circles'),
+    type: 'ColorPickerControl',
+    default: colorPrimary,
+    renderTrigger: true,
   },
 
   annotation_layers: {
@@ -219,6 +268,7 @@ export const controls = {
       ['white_black', 'white/black'],
       ['black_white', 'black/white'],
       ['dark_blue', 'light/dark blue'],
+      ['pink_grey', 'pink/white/grey'],
     ],
     default: 'blue_white_yellow',
     clearable: false,
@@ -443,6 +493,13 @@ export const controls = {
   },
 
   groupby: groupByControl,
+  dimension: {
+    ...groupByControl,
+    label: t('Dimension'),
+    description: t('Select a dimension'),
+    multi: false,
+    default: null,
+  },
 
   columns: Object.assign({}, groupByControl, {
     label: t('Columns'),
@@ -455,6 +512,28 @@ export const controls = {
     label: t('Columns'),
     default: [],
     description: t('Columns to display'),
+    mapStateToProps: state => ({
+      choices: (state.datasource) ? state.datasource.all_cols : [],
+    }),
+  },
+
+  longitude: {
+    type: 'SelectControl',
+    label: t('Longitude'),
+    default: 1,
+    validators: [v.nonEmpty],
+    description: t('Select the longitude column'),
+    mapStateToProps: state => ({
+      choices: (state.datasource) ? state.datasource.all_cols : [],
+    }),
+  },
+
+  latitude: {
+    type: 'SelectControl',
+    label: t('Latitude'),
+    default: 1,
+    validators: [v.nonEmpty],
+    description: t('Select the latitude column'),
     mapStateToProps: state => ({
       choices: (state.datasource) ? state.datasource.all_cols : [],
     }),
@@ -511,6 +590,16 @@ export const controls = {
     default: 'auto',
     renderTrigger: true,
     description: t('Left margin, in pixels, allowing for more room for axis labels'),
+  },
+
+  right_margin: {
+    type: 'SelectControl',
+    freeForm: true,
+    label: t('Right Margin'),
+    choices: formatSelectOptions(['auto', 50, 75, 100, 125, 150, 200]),
+    default: 'auto',
+    renderTrigger: true,
+    description: t('Right margin, in pixels, allowing for more room for axis labels'),
   },
 
   granularity: {
@@ -587,17 +676,28 @@ export const controls = {
   granularity_sqla: {
     type: 'SelectControl',
     label: t('Time Column'),
-    default: control =>
-      control.choices && control.choices.length > 0 ? control.choices[0][0] : null,
     description: t('The time column for the visualization. Note that you ' +
     'can define arbitrary expression that return a DATETIME ' +
-    'column in the table or. Also note that the ' +
+    'column in the table. Also note that the ' +
     'filter below is applied against this column or ' +
     'expression'),
-    mapStateToProps: state => ({
-      choices: (state.datasource) ? state.datasource.granularity_sqla : [],
-    }),
-    freeForm: true,
+    default: (c) => {
+      if (c.options && c.options.length > 0) {
+        return c.options[0].column_name;
+      }
+      return null;
+    },
+    clearable: false,
+    optionRenderer: c => <ColumnOption column={c} />,
+    valueRenderer: c => <ColumnOption column={c} />,
+    valueKey: 'column_name',
+    mapStateToProps: (state) => {
+      const newState = {};
+      if (state.datasource) {
+        newState.options = state.datasource.columns.filter(c => c.is_dttm);
+      }
+      return newState;
+    },
   },
 
   time_grain_sqla: {
@@ -699,6 +799,7 @@ export const controls = {
     type: 'SelectControl',
     freeForm: true,
     label: t('Row limit'),
+    validators: [v.integer],
     default: null,
     choices: formatSelectOptions(ROW_LIMIT_OPTIONS),
   },
@@ -707,6 +808,7 @@ export const controls = {
     type: 'SelectControl',
     freeForm: true,
     label: t('Series limit'),
+    validators: [v.integer],
     choices: formatSelectOptions(SERIES_LIMITS),
     default: 50,
     description: t('Limits the number of time series that get displayed'),
@@ -738,12 +840,29 @@ export const controls = {
     'with the [Periods] text box'),
   },
 
+  multiplier: {
+    type: 'TextControl',
+    label: t('Multiplier'),
+    isFloat: true,
+    default: 1,
+    description: t('Factor to multiply the metric by'),
+  },
+
   rolling_periods: {
     type: 'TextControl',
     label: t('Periods'),
     isInt: true,
     description: t('Defines the size of the rolling window function, ' +
     'relative to the time granularity selected'),
+  },
+
+  grid_size: {
+    type: 'TextControl',
+    label: t('Grid Size'),
+    renderTrigger: true,
+    default: 20,
+    isInt: true,
+    description: t('Defines the grid size in pixels'),
   },
 
   min_periods: {
@@ -939,6 +1058,7 @@ export const controls = {
     type: 'SelectControl',
     freeForm: true,
     label: t('Right Axis Format'),
+    renderTrigger: true,
     default: '.3s',
     choices: D3_FORMAT_OPTIONS,
     description: D3_FORMAT_DOCS,
@@ -1051,6 +1171,14 @@ export const controls = {
     ),
   },
 
+  extruded: {
+    type: 'CheckboxControl',
+    label: t('Extruded'),
+    renderTrigger: true,
+    default: true,
+    description: ('Whether to make the grid 3D'),
+  },
+
   show_brush: {
     type: 'CheckboxControl',
     label: t('Range Filter'),
@@ -1146,6 +1274,105 @@ export const controls = {
     renderTrigger: true,
     default: true,
     description: t('Whether to display the min and max values of the X axis'),
+  },
+
+  min: {
+    type: 'TextControl',
+    label: t('Min'),
+    default: 0,
+    description: t('Set the min value of the gauge'),
+  },
+
+  max: {
+    type: 'TextControl',
+    label: t('Max'),
+    default: 100,
+    description: t('Set the max value of the gauge'),
+  },
+
+  num: {
+    type: 'TextControl',
+    label: t('Num'),
+    default: 10,
+    description: t('Set the Num value of the axis'),
+  },
+
+  inner_face_color: {
+    type: 'ColorPickerControl',
+    label: t('Inner Face Color'),
+    renderTrigger: true,
+    default: '#F74100',
+    description: t('Set the color of the gauge inner face'),
+  },
+
+  face_color: {
+    type: 'ColorPickerControl',
+    label: t('Face Color'),
+    renderTrigger: true,
+    default: '#ffffff',
+    description: t('Set the color of the gauge face'),
+  },
+
+  needle_color: {
+    type: 'ColorPickerControl',
+    label: t('Needle Color'),
+    renderTrigger: true,
+    default: '#000000',
+    description: t('Set the color of the gauge needle'),
+  },
+
+  value_color: {
+    type: 'ColorPickerControl',
+    label: t('Value Color'),
+    renderTrigger: true,
+    default: '#000000',
+    description: t('Set the color of the gauge value'),
+  },
+
+  value_font_size: {
+    type: 'SelectControl',
+    label: t('Value Font Size'),
+    freeForm: true,
+    renderTrigger: true,
+    choices: formatSelectOptions([14, 16, 18, 20, 22, 24, 26]),
+    default: 20,
+    description: t('Set the font size of the gauge value'),
+  },
+
+  ticks_color: {
+    type: 'ColorPickerControl',
+    label: t('Ticks Color'),
+    renderTrigger: true,
+    default: '#000000',
+    description: t('Set the color of the gauge ticks'),
+  },
+
+  ticks_font_size: {
+    type: 'SelectControl',
+    label: t('Ticks Font Size'),
+    freeForm: true,
+    renderTrigger: true,
+    choices: formatSelectOptions([14, 16, 18, 20, 22, 24, 26]),
+    default: 20,
+    description: t('Set the font size of the gauge ticks'),
+  },
+
+  stroke_color: {
+    type: 'ColorPickerControl',
+    label: t('Stroke Color'),
+    renderTrigger: true,
+    default: '#000000',
+    description: t('Set the color of the gauge stroke'),
+  },
+
+  stroke_width: {
+    type: 'SelectControl',
+    label: t('Stroke Width'),
+    freeForm: true,
+    renderTrigger: true,
+    choices: formatSelectOptions([0.5, 1, 1.5, 2, 2.5, 3]),
+    default: 2,
+    description: t('Set the width of the gauge ticks stroke'),
   },
 
   y_axis_showminmax: {
@@ -1263,6 +1490,7 @@ export const controls = {
   mapbox_style: {
     type: 'SelectControl',
     label: t('Map Style'),
+    renderTrigger: true,
     choices: [
       ['mapbox://styles/mapbox/streets-v9', 'Streets'],
       ['mapbox://styles/mapbox/dark-v9', 'Dark'],
@@ -1296,6 +1524,15 @@ export const controls = {
     'number of points (>1000) will cause lag.'),
   },
 
+  point_radius_fixed: {
+    type: 'FixedOrMetricControl',
+    label: t('Point Size'),
+    description: t('Fixed point radius'),
+    mapStateToProps: state => ({
+      datasource: state.datasource,
+    }),
+  },
+
   point_radius: {
     type: 'SelectControl',
     label: t('Point Radius'),
@@ -1316,6 +1553,22 @@ export const controls = {
     description: t('The unit of measure for the specified point radius'),
   },
 
+  point_unit: {
+    type: 'SelectControl',
+    label: t('Point Unit'),
+    default: 'square_m',
+    clearable: false,
+    choices: [
+      ['square_m', 'Square meters'],
+      ['square_km', 'Square kilometers'],
+      ['square_miles', 'Square miles'],
+      ['radius_m', 'Radius in meters'],
+      ['radius_km', 'Radius in kilometers'],
+      ['radius_miles', 'Radius in miles'],
+    ],
+    description: t('The unit of measure for the specified point radius'),
+  },
+
   global_opacity: {
     type: 'TextControl',
     label: t('Opacity'),
@@ -1323,6 +1576,15 @@ export const controls = {
     isFloat: true,
     description: t('Opacity of all clusters, points, and labels. ' +
     'Between 0 and 1.'),
+  },
+
+  viewport: {
+    type: 'ViewportControl',
+    label: t('Viewport'),
+    renderTrigger: true,
+    description: t('Parameters related to the view and perspective on the map'),
+    // default is whole world mostly centered
+    default: defaultViewport,
   },
 
   viewport_zoom: {
@@ -1378,6 +1640,7 @@ export const controls = {
   color: {
     type: 'ColorPickerControl',
     label: t('Color'),
+    default: colorPrimary,
     description: t('Pick a color'),
   },
 
