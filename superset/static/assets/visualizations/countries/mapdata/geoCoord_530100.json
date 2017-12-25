@@ -1,0 +1,15 @@
+﻿[
+	{"name":"五华区","id":"530102","longitude":102.70,"latitude":25.05},
+	{"name":"盘龙区","id":"530103","longitude":102.72,"latitude":25.03},
+	{"name":"官渡区","id":"530111","longitude":102.95,"latitude":25.22},
+	{"name":"西山区","id":"530112","longitude":102.60,"latitude":25.33},
+	{"name":"东川区","id":"530113","longitude":103.18,"latitude":26.08},
+	{"name":"晋宁县","id":"530122","longitude":102.60,"latitude":24.67},
+	{"name":"富民县","id":"530124","longitude":102.50,"latitude":25.22},
+	{"name":"宜良县","id":"530125","longitude":103.15,"latitude":24.92},
+	{"name":"石林彝族自治县","id":"530126","longitude":103.27,"latitude":24.77},
+	{"name":"嵩明县","id":"530127","longitude":103.03,"latitude":25.35},
+	{"name":"禄劝彝族苗族自治县","id":"530128","longitude":102.47,"latitude":25.55},
+	{"name":"寻甸回族彝族自治县","id":"530129","longitude":103.25,"latitude":25.57},
+	{"name":"安宁市","id":"530181","longitude":102.48,"latitude":24.92}
+]

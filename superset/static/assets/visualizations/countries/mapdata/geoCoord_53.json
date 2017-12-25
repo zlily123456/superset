@@ -1,0 +1,20 @@
+[
+	
+	{"name":"昆明市","id":"530100","longitude":102.72,"latitude":25.05},
+	{"name":"曲靖市","id":"530300","longitude":103.80,"latitude":25.50},
+	{"name":"玉溪市","id":"530400","longitude":102.55,"latitude":24.35},
+	{"name":"保山市","id":"530500","longitude":99.17,"latitude":25.12},
+	{"name":"昭通市","id":"530600","longitude":103.72,"latitude":27.33},
+	{"name":"丽江市","id":"530700","longitude":100.23,"latitude":26.88},
+	{"name":"临沧市","id":"530900","longitude":100.08,"latitude":23.88},
+	{"name":"楚雄彝族自治州","id":"532300","longitude":101.55,"latitude":25.03},
+	{"name":"红河哈尼族彝族自治州","id":"532500","longitude":103.40,"latitude":23.37},
+	{"name":"文山壮族苗族自治州","id":"532600","longitude":104.25,"latitude":23.37},
+	{"name":"西双版纳傣族自治州","id":"532800","longitude":100.80,"latitude":22.02},
+	{"name":"大理白族自治州","id":"532900","longitude":100.23,"latitude":25.60},
+	{"name":"德宏傣族景颇族自治州","id":"533100","longitude":98.58,"latitude":24.43},
+	{"name":"怒江傈僳族自治州","id":"533300","longitude":98.85,"latitude":25.85},
+	{"name":"迪庆藏族自治州","id":"533400","longitude":99.70,"latitude":27.83},
+	{"name":"普洱市","id":"530800","longitude":100.48,"latitude":22.8}
+
+]

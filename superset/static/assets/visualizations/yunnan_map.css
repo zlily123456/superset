@@ -1,0 +1,36 @@
+.yunnan_map svg {
+    background-color: #feffff;
+}
+
+.yunnan_map {
+  position: relative;
+}
+
+.yunnan_map .background {
+    fill: rgba(255,255,255,0);
+    pointer-events: all;
+}
+
+.yunnan_map .map-layer {
+    fill: #fff;
+    stroke: #aaa;
+}
+
+.yunnan_map .effect-layer {
+    pointer-events: none;
+}
+
+.yunnan_map text {
+    font-weight: 300;
+    color: #333333;
+}
+
+.yunnan_map text.big-text {
+    font-size: 30px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.yunnan_map path.region {
+    cursor: pointer;
+}
